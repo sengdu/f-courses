@@ -38,7 +38,7 @@ if(isset($_SESSION['cart'])){
 					<li style="list-style:none;">
 						<h3>Book Store</h3>
 						<a href="view-cart.php">
-							(<?php ?>) books in your card
+							(<?php echo $cart ?>) books in your card
 						</a>
 					</li> <br><br>
 					

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -12,82 +13,149 @@
             integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
             crossorigin="anonymous"
         />
-        <script src="jquery.js"></script>
-        <title>Hello, world!</title>
-        <style>
-            .close:hover {
-                opacity: 2;
+		<!-- <style>
 
-                cursor: pointer;
-            }
-        </style>
+			.main{
+				overflow: hidden;
+			}
+			.sidebar{
+				float: left;
+				width: 30%;
+				background-color: rgb(51, 138, 153);
+			}
+			.content{
+				float: left;
+				width: 70%;
+			}
+			.footer{
+				background-color: slategray;
+			}
+			@media(max-width:500px){
+				.sidebar {
+					height: 100px;
+					float:none;
+					width: 100%;
+				}
+				.content{
+					width: 100%;
+					float: none;
+				}
+			}
+		</style> -->
+        <style>
+			.main{
+				display: flex;
+			}
+			.sidebar{
+				background-color: green;
+				flex-grow: 1;
+			}
+			.content{
+				background-color: steelblue;
+				opacity:1;
+				flex-grow: 3;
+			}
+			.footer{
+				padding: 9px ;
+				background-color: darkslategray;
+				text-align: center;
+				color:white;
+			}
+
+		</style>
+		<title>Hello, world!</title>
     </head>
     <body>
-        <div class="container">
-            <h1>Categories List</h1>
-            <ul class="list-group text-center w-50 d-flex"></ul>
-            <br /><br />
-            <input type="text" class="form-control w-50" /> <br />
-            <button class="btn btn-primary">Add</button>
+       
+        <div class="container" style="box-shadow: 10px 5px 5px rgb(116, 98, 98);
+		">
+			<div class="header mt-4" style="background-color: yellow;padding:10px;text-align: center;border-radius: 10px;">
+				<h1>Category Client</h1>
+			</div>
+			<div class="main mt-2">
+				<div class="sidebar">
+
+				</div>
+				<div class="content">
+					<ul class="list-group"></ul>
+					<input type="text" class="form-control mt-3" /> <br />
+                    <button class="btn btn-primary">Add Btn</button>
+				</div>
+				
+			</div>
+			<div class="footer">
+				&copy;Copyright 2021
+			</div>
         </div>
+		<script src="jquery.js"></script>
+		<script>
+			const api = "http://127.0.0.1:8000/api/categories";
+			
+			$("button").click(function () {
+				let text = $("input").val();
+				let li = $("<li>").html(text).addClass("list-group-item");
+				fetch(api, {
+					method: "post",
+					body: JSON.stringify({ name: text }),
+					// catious
+					headers: {
+						"content-type": "application/json",
+					},
+				});
+			});
+		
+			fetch(api)
+				.then(res => res.json())
+				.then( (data) => {
+					render(data);
+					localStorage.setItem('data',JSON.stringify(data));
+				
+				})
+				.catch(function () {
+					let data = JSON.parse(localStorage.getItem('data')) || [];
+					if(data){
+						render(data);
+					}else{
+						var li = $("<li>")
+						.html("Errors fetching data")
+						.addClass("bg-danger w-50 p-2 text-center text-white");
+					$("ul").append(li);
+					}
+				});
+				function render(data){
+					for (i in data) {
+						let id = data[i].id;
+						let del = $("<a>")
+							.addClass("close text-danger  float-end")
+							.html("&times;")
+							.click(function () {
+								fetch(api + "/" + id, {
+									method: "delete",
+								});
+								$(this).parent().remove();
+							});
+		
+						var li = $('<li>')
+							.html($('<span>').html(data[i].name))
+							.addClass("list-group-item ")
+							.append(del)
+							.dblclick(function () {
+								var text = prompt("enter category");
+								$('span'.this).html(text);
+								fetch(api + '/' + id, {
+									method: 'put',
+									body: JSON.stringify({ name: text }),
+									headers: {
+										"content-type": "application/json",
+									},
+								});
+							});
+						$("ul").append(li);
+					}
+				}
+		</script>
+		
 
-        <script>
-            const api = "http://127.0.0.1:8000/api/categories";
-            $("button").click(function () {
-                let text = $("input").val();
-                let li = $("<li>").html(text).addClass("list-group-item");
-                fetch(api, {
-                    method: "post",
-                    body: JSON.stringify({ name: text }),
-                    // catious
-                    headers: {
-                        "content-type": "application/json",
-                    },
-                });
-            });
-
-            fetch(api)
-                .then(function (res) {
-                    return res.json();
-                })
-                .then(function (data) {
-                    for (i in data) {
-                        var id = data[i].id;
-                        var del = $("<a>")
-                            .addClass("close text-danger  float-end")
-                            .html("&times;")
-                            .click(function () {
-                                fetch(api + "/" + id, {
-                                    method: "delete",
-                                });
-                                $(this).parent().remove();
-                            });
-
-                        var li = $('<li>')
-                            .html($('<span>').html(data[i].name))
-                            .addClass("list-group-item ")
-                            .append(del)
-                            .dblclick(function () {
-                                var text = prompt("enter category");
-                                $('span'.this).html(text);
-                                fetch(api + '/' + id, {
-                                    method: 'put',
-                                    body: JSON.stringify({ name: text }),
-                                    headers: {
-                                        "content-type": "application/json",
-                                    },
-                                });
-                            });
-                        $("ul").append(li);
-                    }
-                })
-                .catch(function () {
-                    var li = $("<li>")
-                        .html("Errors fetching data")
-                        .addClass("bg-danger w-50 p-2 text-center text-white");
-                    $("ul").append(li);
-                });
-        </script>
 
         <!-- Optional JavaScript; choose one of the two! -->
 

@@ -5,7 +5,7 @@ $password = $_POST['password'];
 
 if($name == "sengdu" and $password =="123"){
 	$_SESSION['auth'] = true;
-	header("location:list.php");
+	header("location:list-book.php");
 }else{
 	header("location:admin-index.php");
 }
